@@ -2,7 +2,6 @@
 // Copyright 2025-2026 Mindful Software LLC d/b/a Dartastic.io, All rights reserved.
 
 import 'package:dartastic_opentelemetry/dartastic_opentelemetry.dart';
-import 'package:dartastic_opentelemetry_api/dartastic_opentelemetry_api.dart';
 
 import 'otel_ramp_suppression.dart';
 
@@ -54,54 +53,69 @@ Future<T> tracedRamp<T>({
   final t = tracer ?? OTel.tracerProvider().getTracer('otel_ramp');
   final span = t.startSpan('ramp $operation', kind: SpanKind.client);
   try {
-    span.setStringAttribute('rpc.system', 'ramp');
+    span.addAttributes(
+        OTel.attributes([OTel.attributeString('rpc.system', 'ramp')]));
     final r = await invoke();
     final res = r.result;
     if (res != null) {
       if (res.businessId != null) {
-        span.setStringAttribute('ramp.business.id', res.businessId!);
+        span.addAttributes(OTel.attributes(
+            [OTel.attributeString('ramp.business.id', res.businessId!)]));
       }
       if (res.userId != null) {
-        span.setStringAttribute('user.id', res.userId!);
+        span.addAttributes(
+            OTel.attributes([OTel.attributeString('user.id', res.userId!)]));
       }
       if (res.cardId != null) {
-        span.setStringAttribute('ramp.card.id', res.cardId!);
+        span.addAttributes(OTel.attributes(
+            [OTel.attributeString('ramp.card.id', res.cardId!)]));
       }
       if (res.spendProgramId != null) {
-        span.setStringAttribute('ramp.spend_program.id', res.spendProgramId!);
+        span.addAttributes(OTel.attributes([
+          OTel.attributeString('ramp.spend_program.id', res.spendProgramId!)
+        ]));
       }
       if (res.transactionId != null) {
-        span.setStringAttribute('ramp.transaction.id', res.transactionId!);
+        span.addAttributes(OTel.attributes(
+            [OTel.attributeString('ramp.transaction.id', res.transactionId!)]));
       }
       if (res.amount != null) {
-        span.setDoubleAttribute('ramp.amount', res.amount!);
+        span.addAttributes(OTel.attributes(
+            [OTel.attributeDouble('ramp.amount', res.amount!)]));
       }
       if (res.currency != null) {
-        span.setStringAttribute('ramp.currency', res.currency!);
+        span.addAttributes(OTel.attributes(
+            [OTel.attributeString('ramp.currency', res.currency!)]));
       }
       if (res.merchantCategory != null) {
-        span.setStringAttribute(
-          'ramp.merchant.category',
-          res.merchantCategory!,
-        );
+        span.addAttributes(OTel.attributes([
+          OTel.attributeString(
+            'ramp.merchant.category',
+            res.merchantCategory!,
+          )
+        ]));
       }
       if (res.status != null) {
-        span.setStringAttribute('ramp.status', res.status!);
+        span.addAttributes(OTel.attributes(
+            [OTel.attributeString('ramp.status', res.status!)]));
       }
       if (res.statusCode != null) {
-        span.setIntAttribute('http.response.status_code', res.statusCode!);
+        span.addAttributes(OTel.attributes(
+            [OTel.attributeInt('http.response.status_code', res.statusCode!)]));
       }
       if (res.errorCode != null) {
-        span.setStringAttribute('ramp.error.code', res.errorCode!);
+        span.addAttributes(OTel.attributes(
+            [OTel.attributeString('ramp.error.code', res.errorCode!)]));
       }
-      final fail =
-          res.errorCode != null ||
+      final fail = res.errorCode != null ||
           (res.statusCode != null && res.statusCode! >= 400);
       if (fail) {
-        span.setStringAttribute(
-          ErrorResource.errorType.key,
-          res.errorCode ?? 'ramp.error',
-        );
+        span.addAttributes(OTel.attributes([
+          OTel.attributeString(
+            ErrorResource.errorType.key,
+            res.errorCode ?? 'ramp.error',
+          )
+        ]));
         span.setStatus(SpanStatusCode.Error, res.errorMessage);
       }
     }
